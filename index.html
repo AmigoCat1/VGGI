@@ -1,35 +1,146 @@
 <!DOCTYPE html>
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>PA2 - Variant 16</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
+        body {
+            margin: 0;
+            padding: 30px;
+            background: #e9edf2;
+            font-family: Arial, sans-serif;
+            color: #222;
+        }
 
-<title>PA#1</title>
-<style>
-    body {
-        background-color: #EEEEEE;
-    }
-</style>
+        .page {
+            width: 660px;
+            margin: 0 auto;
+        }
 
+        h2 {
+            margin: 0 0 8px;
+            font-size: 26px;
+        }
 
-<script src="./Utils/trackball-rotator.js"></script>
-<script src="./Utils/m4.js"></script>
-<script src="./shader.gpu"></script>
-<script src="./model.js"></script>
-<script src="./main.js"></script>
+        .description {
+            margin-bottom: 18px;
+            line-height: 1.5;
+            color: #444;
+        }
 
+        .controls {
+            background: white;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        label {
+            width: 140px;
+            font-weight: bold;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            margin: 0 12px;
+            cursor: pointer;
+        }
+
+        .value {
+            width: 40px;
+            padding: 4px 6px;
+            text-align: center;
+            background: #eef3f7;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        #canvas-holder {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        canvas {
+            display: block;
+            background: #050509;
+            border-radius: 5px;
+        }
+
+        .info {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+
+    <script src="./Utils/trackball-rotator.js"></script>
+    <script src="./Utils/m4.js"></script>
+    <script src="./shader.gpu"></script>
+    <script src="./model.js"></script>
+    <script src="./main.js"></script>
 </head>
+
 <body onload="init()">
+    <div class="page">
+        <h2>PA2 - Variant 16</h2>
 
-<h2>PA1 - Variant 16</h2>
+        <div class="description">
+            Surface of Revolution of a Parabola of Arbitrary Position<br>
+            Gouraud Shading + Facet Area Weighted Average Normal
+        </div>
 
-<p id="message">
-    Surface of Revolution of a Parabola of Arbitrary Position
-    <br>
-    Drag the mouse to rotate the surface.
-</p>
+        <div class="controls">
+            <div class="control-row">
+                <label for="uSlider">U granularity</label>
+                <input type="range" id="uSlider" min="8" max="80" value="36">
+                <span id="uValue" class="value">36</span>
+            </div>
 
-<div id="canvas-holder">
-   <canvas width="600" height="600" id="webglcanvas" style="background-color:red"></canvas>
-</div>
+            <div class="control-row">
+                <label for="vSlider">V granularity</label>
+                <input type="range" id="vSlider" min="8" max="80" value="24">
+                <span id="vValue" class="value">24</span>
+            </div>
+        </div>
 
+        <div id="canvas-holder">
+            <canvas width="600" height="600" id="webglcanvas"></canvas>
+            <div class="info">Drag the mouse to rotate the surface</div>
+        </div>
+    </div>
 
-</body></html>
+    <script>
+        const uSlider = document.getElementById("uSlider");
+        const vSlider = document.getElementById("vSlider");
+        const uValue = document.getElementById("uValue");
+        const vValue = document.getElementById("vValue");
+
+        function updateSurface() {
+            const u = parseInt(uSlider.value);
+            const v = parseInt(vSlider.value);
+
+            uValue.textContent = u;
+            vValue.textContent = v;
+
+            rebuildSurface(u, v);
+        }
+
+        uSlider.addEventListener("input", updateSurface);
+        vSlider.addEventListener("input", updateSurface);
+    </script>
+</body>
+</html>
