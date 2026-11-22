@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ControlTask - Variant 16</title>
+    <title>CGW - Variant 16</title>
     <style>
         * { box-sizing: border-box; }
 
@@ -15,7 +15,7 @@
             font-family: Arial, sans-serif;
         }
 
-        .page { width: 660px; margin: 0 auto; }
+        .page { width: 860px; max-width: 100%; margin: 0 auto; }
         h2 { margin: 0 0 8px; font-size: 26px; }
         .description { margin-bottom: 18px; color: #444; line-height: 1.5; }
 
@@ -33,14 +33,79 @@
         .value { width: 40px; padding: 4px 6px; text-align: center; background: #eef3f7; border-radius: 4px; font-weight: bold; }
         .checkbox-row { margin: 12px 0 0; }
         .checkbox-row label { cursor: pointer; }
+        .point-settings { border-top: 1px solid #e6e9ef; margin-top: 14px; padding-top: 12px; }
+        .point-settings h3 { font-size: 15px; margin: 0 0 8px; }
+        .point-status { display: flex; align-items: center; gap: 14px; margin-top: 10px; color: #4b5664; font-size: 13px; }
+        .point-status strong { color: #1c3445; }
+        button { border: 1px solid #ced6e0; background: #eef3f8; border-radius: 5px; padding: 7px 12px; cursor: pointer; }
+        button:hover { background: #e2edf8; }
+        .keyboard-help { font-size: 12px; color: #657385; margin-top: 8px; }
+        kbd { font-family: inherit; border: 1px solid #cdd5df; background: #f5f7f9; border-radius: 3px; padding: 2px 5px; }
 
         .maps { display: flex; gap: 28px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #eee; }
         .map-item { display: flex; align-items: center; gap: 9px; color: #444; font-size: 13px; }
         .map-item img { width: 52px; height: 52px; border: 1px solid #ccc; border-radius: 4px; }
 
-        #canvas-holder { padding: 10px; }
+        .controls { max-width: 660px; }
+        .viewer-layout { display: flex; align-items: flex-start; gap: 16px; }
+        #canvas-holder { width: 660px; flex-shrink: 0; padding: 10px; }
         canvas { display: block; width: 600px; height: 600px; background: #050509; border-radius: 5px; }
         .info { margin-top: 8px; color: #666; font-size: 13px; text-align: center; }
+
+        .key-panel {
+            width: 184px;
+            padding: 16px 12px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .key-panel h3 { margin: 0 0 5px; font-size: 15px; }
+        .key-panel p { margin: 0 0 14px; color: #667382; font-size: 12px; line-height: 1.4; }
+        .wasd-keys {
+            display: grid;
+            grid-template-columns: repeat(3, 42px);
+            gap: 6px;
+            justify-content: center;
+        }
+        .keycap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            background: #eef3f8;
+            border: 1px solid #cbd4df;
+            border-bottom: 3px solid #b8c4d1;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 17px;
+            color: #304458;
+            transition: background 0.08s, color 0.08s;
+        }
+        .keycap.active {
+            background: #247bd1;
+            color: #fff;
+            border-color: #1661a8;
+            box-shadow: 0 0 10px rgba(36, 123, 209, 0.35);
+        }
+        .key-status {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e9ef;
+            color: #667382;
+            font-size: 12px;
+        }
+        .key-status strong { color: #263b4f; }
+        .key-status div { margin: 5px 0; }
+
+        @media (max-width: 920px) {
+            .page { width: 660px; }
+            .viewer-layout { flex-wrap: wrap; }
+            #canvas-holder { width: 100%; }
+            canvas { max-width: 100%; height: auto; }
+            .key-panel { width: 100%; }
+        }
     </style>
 
     <script src="./Utils/trackball-rotator.js"></script>
@@ -52,10 +117,10 @@
 </head>
 <body onload="init()">
     <div class="page">
-        <h2>ControlTask - Variant 16</h2>
+        <h2>CGW - Variant 16</h2>
         <div class="description">
             Surface of Revolution of a Parabola of Arbitrary Position<br>
-            Diffuse, Specular and Normal Mapping · Gram-Schmidt: Prioritize normal
+            Rotation of texture coordinates around a movable UV point<br>Diffuse, Specular and Normal Mapping · Gram-Schmidt: Prioritize normal
         </div>
 
         <div class="controls">
@@ -72,6 +137,22 @@
             <div class="checkbox-row">
                 <label><input type="checkbox" id="normalToggle" checked> Enable normal map</label>
             </div>
+            <div class="point-settings">
+                <h3>Texture rotation</h3>
+                <div class="control-row">
+                    <label for="angleSlider">Angle</label>
+                    <input type="range" id="angleSlider" min="-180" max="180" step="1" value="35">
+                    <span id="angleValue" class="value">35°</span>
+                </div>
+                <div class="point-status">
+                    <span>Rotation point: <strong id="pivotValue">U: 0.50, V: 0.50</strong></span>
+                    <button type="button" id="resetRotation">Reset</button>
+                </div>
+                <div class="keyboard-help">Move the point: <kbd>A</kbd>/<kbd>D</kbd> = U, <kbd>W</kbd>/<kbd>S</kbd> = V. Yellow marker shows the point on the surface.</div>
+                <div class="checkbox-row">
+                    <label><input type="checkbox" id="showPivot" checked> Show rotation point</label>
+                </div>
+            </div>
             <div class="maps">
                 <div class="map-item"><img src="./textures/diffuse.png" alt="Diffuse map"> Diffuse</div>
                 <div class="map-item"><img src="./textures/specular.png" alt="Specular map"> Specular</div>
@@ -79,9 +160,27 @@
             </div>
         </div>
 
-        <div id="canvas-holder">
-            <canvas width="600" height="600" id="webglcanvas"></canvas>
-            <div class="info">Drag the mouse to rotate the surface</div>
+        <div class="viewer-layout">
+            <div id="canvas-holder">
+                <canvas width="600" height="600" id="webglcanvas"></canvas>
+                <div class="info">Drag the mouse to rotate the surface</div>
+            </div>
+
+            <div class="key-panel">
+                <h3>Keyboard controls</h3>
+                <p>Move the rotation point</p>
+                <div class="wasd-keys">
+                    <span></span><div class="keycap" data-code="KeyW">W</div><span></span>
+                    <div class="keycap" data-code="KeyA">A</div>
+                    <div class="keycap" data-code="KeyS">S</div>
+                    <div class="keycap" data-code="KeyD">D</div>
+                </div>
+                <div class="key-status">
+                    <div>Last key: <strong id="lastKey">—</strong></div>
+                    <div>U: <strong id="keyU">0.50</strong></div>
+                    <div>V: <strong id="keyV">0.50</strong></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -103,6 +202,71 @@
         vSlider.addEventListener("input", updateSurface);
         document.getElementById("normalToggle").addEventListener("change", function() {
             normalMappingEnabled = this.checked;
+        });
+
+        const angleSlider = document.getElementById("angleSlider");
+        const angleValue = document.getElementById("angleValue");
+        const pivotValue = document.getElementById("pivotValue");
+
+        function updateRotationInfo() {
+            angleValue.textContent = rotationAngle + "°";
+            pivotValue.textContent = "U: " + pivotU.toFixed(2) + ", V: " + pivotV.toFixed(2);
+            document.getElementById("keyU").textContent = pivotU.toFixed(2);
+            document.getElementById("keyV").textContent = pivotV.toFixed(2);
+        }
+
+        angleSlider.addEventListener("input", function() {
+            rotationAngle = Number(this.value);
+            updateRotationInfo();
+        });
+
+        document.getElementById("showPivot").addEventListener("change", function() {
+            showRotationPoint = this.checked;
+        });
+
+        document.getElementById("resetRotation").addEventListener("click", function() {
+            pivotU = 0.5;
+            pivotV = 0.5;
+            rotationAngle = 0;
+            angleSlider.value = 0;
+            updateRotationInfo();
+        });
+
+        document.addEventListener("keydown", function(event) {
+            if (event.ctrlKey || event.altKey || event.metaKey) return;
+            const step = 0.02;
+
+            switch (event.code) {
+                case "KeyA": pivotU -= step; break;
+                case "KeyD": pivotU += step; break;
+                case "KeyW": pivotV += step; break;
+                case "KeyS": pivotV -= step; break;
+                default: return;
+            }
+
+            event.preventDefault();
+            pivotU = Math.max(0.02, Math.min(0.98, pivotU));
+            pivotV = Math.max(0.02, Math.min(0.98, pivotV));
+            updateRotationInfo();
+
+            const key = document.querySelector('[data-code="' + event.code + '"]');
+            clearTimeout(key.releaseTimer);
+            key.classList.add("active");
+            document.getElementById("lastKey").textContent = event.code.slice(-1);
+        });
+
+        document.addEventListener("keyup", function(event) {
+            const key = document.querySelector('[data-code="' + event.code + '"]');
+            if (!key) return;
+            clearTimeout(key.releaseTimer);
+            key.releaseTimer = setTimeout(function() { key.classList.remove("active"); }, 160);
+        });
+
+        window.addEventListener("blur", function() {
+            document.querySelectorAll(".keycap").forEach(function(key) {
+                clearTimeout(key.releaseTimer);
+                key.classList.remove("active");
+            });
         });
     </script>
 </body>

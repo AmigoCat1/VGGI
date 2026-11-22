@@ -9,6 +9,10 @@ let spaceball;
 let uSegments = 36;
 let vSegments = 24;
 let normalMappingEnabled = true;
+let pivotU = 0.5;
+let pivotV = 0.5;
+let rotationAngle = 35;
+let showRotationPoint = true;
 
 function ShaderProgram(program) {
     this.prog = program;
@@ -46,6 +50,9 @@ function draw(time = performance.now()) {
     const lightEye = m4.transformPoint(modelView, lightWorld);
     gl.uniform3fv(shProgram.iLight, lightEye);
     gl.uniform1i(shProgram.iUseNormalMap, normalMappingEnabled ? 1 : 0);
+    gl.uniform2f(shProgram.iPivot, pivotU, pivotV);
+    gl.uniform1f(shProgram.iRotationAngle, rotationAngle * Math.PI / 180);
+    gl.uniform1i(shProgram.iShowPivot, showRotationPoint ? 1 : 0);
 
     surface.Draw();
 }
@@ -69,6 +76,9 @@ function initGL() {
     shProgram.iModelView = gl.getUniformLocation(program, "ModelViewMatrix");
     shProgram.iLight = gl.getUniformLocation(program, "lightPosition");
     shProgram.iUseNormalMap = gl.getUniformLocation(program, "useNormalMap");
+    shProgram.iPivot = gl.getUniformLocation(program, "rotationPivot");
+    shProgram.iRotationAngle = gl.getUniformLocation(program, "rotationAngle");
+    shProgram.iShowPivot = gl.getUniformLocation(program, "showPivot");
 
     gl.uniform1i(gl.getUniformLocation(program, "diffuseMap"), 0);
     gl.uniform1i(gl.getUniformLocation(program, "specularMap"), 1);
